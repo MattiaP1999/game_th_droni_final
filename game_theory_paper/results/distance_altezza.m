@@ -2,7 +2,6 @@ close all
 clear all
 load("./data/distance_altezza/average_multi.mat")
 load("./data/distance_altezza/average_single.mat")
-
 % 
 figure
 set(gca,'TickLabelInterpreter','latex')
