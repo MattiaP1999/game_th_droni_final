@@ -166,14 +166,14 @@ def playGame_multiple(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tole
 
 
 # START OF SCRIPT
-n_ch_realization = 1
+n_ch_realization = 10
 #p_fas = [1e-2]
 n_pfas = 3
 p_fas = [1e-4,1e-3,1e-2]
-N = [1,2,3,4,5,6]
+N = [1,2,3,4,5]
 sigma = 10
-results_valgame = np.zeros((3,6))
-num_realizations = np.int32(1e6)
+results_valgame = np.zeros((3,5))
+num_realizations = np.int32(5e5)
 tolerance = 1e-5
 strategy=True #true for one opt
 k=50
