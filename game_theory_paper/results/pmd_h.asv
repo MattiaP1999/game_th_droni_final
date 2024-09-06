@@ -1,8 +1,9 @@
 close all
-%clear all
-load("./data/results_pmd_h_0.mat")
+clear all
+load("./data/results_pmd_h.mat")
 p_fas = [1e-4,1e-3,1e-2]; %!!
 altezza = [10,20,30,50,70,100]; % !!
+values_game = values_game+values_game_50)
 figure
 set(gca,'TickLabelInterpreter','latex')
 plot(altezza,values_game(1,:),'-o')

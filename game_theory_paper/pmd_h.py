@@ -209,7 +209,7 @@ def grad(x,D):
 # START OF SCRIPT
 
 initial_position = 0
-n_ch_realization = 20
+n_ch_realization = 100
 p_fas = [1e-4,1e-3,1e-2] #np.ndarray.tolist(np.linspace(1e-3,1.3e-3,10)) #[1e-5,1.05e-5,1.1e-5,1.15e-5,1.2e-5,1.25e-5,1.3e-5]
 distances = [10,20,30,50,70,100]
 n_dist= len(distances)
@@ -259,7 +259,7 @@ for p_fa in p_fas:
             val_game,mix_row = game_solver(p_md)
             val_games[0,kk-1]=val_game
         results_valgame[index_pfa,distance_index]=val_games.mean()
-        filename = "results_pmd_h.mat"
+        filename = "results_pmd_h_50.mat"
         dictionary = {"values_game":results_valgame,"p_fas":p_fas}
         sp.io.savemat(filename,dictionary) 
         print(distance_index) 
