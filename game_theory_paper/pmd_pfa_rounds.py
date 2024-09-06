@@ -138,10 +138,10 @@ n_ch_realization = 20
 #p_fas = [1e-2]
 n_pfas = 20
 p_fas = np.ndarray.tolist(np.linspace(1e-3,1e-1,n_pfas))
-N = 2
+N = 1
 sigmas = [10,13,16]
 results_valgame = np.zeros((3,n_pfas))
-num_realizations = np.int32(4e5)
+num_realizations = np.int32(2e5)
 tolerance = 1e-5
 k=50
 distance =50
@@ -190,9 +190,10 @@ for sigma in sigmas:
         counter = counter +1
         print(str(counter/np.float16(results_valgame.size)*100))
         index_pfa=index_pfa+1
+        filename ="Results_pfa_pmd_round_"+str(N)+".mat"
+        dic = {"values_game_"+str(N):results_valgame,"p_fas":p_fas}
+        sp.io.savemat(filename, dic)
     index_sigma=index_sigma+1
-filename ="Results_pfa_pmd_round_"+str(N)+".mat"
-sp.io.savemat(filename, dict(values_game=results_valgame,p_fas = p_fas))
     # plotting
 """fig, ax = plt.subplots()
 

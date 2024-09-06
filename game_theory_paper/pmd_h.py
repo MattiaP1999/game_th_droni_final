@@ -213,10 +213,10 @@ n_ch_realization = 20
 p_fas = [1e-4,1e-3,1e-2] #np.ndarray.tolist(np.linspace(1e-3,1.3e-3,10)) #[1e-5,1.05e-5,1.1e-5,1.15e-5,1.2e-5,1.25e-5,1.3e-5]
 distances = [10,20,30,50,70,100]
 n_dist= len(distances)
-results_valgame = np.zeros((1,n_dist))
-results_risparmio = np.zeros((1,n_dist))
-results_dist_naive = np.zeros((1,n_dist))
-results_dist_opt = np.zeros((1,n_dist))
+results_valgame = np.zeros((3,n_dist))
+results_risparmio = np.zeros((3,n_dist))
+results_dist_naive = np.zeros((3,n_dist))
+results_dist_opt = np.zeros((3,n_dist))
 num_realizations = np.int32(2e5)
 tolerance = 1e-4
 strategy=True #true for one opt
@@ -256,10 +256,11 @@ for p_fa in p_fas:
                     x=varphi_prime*(ch[0][jj]/ch[0][ii])**2
                     p_md[ii,jj] = sp.stats.ncx2.cdf(x, 1, nc, loc=0, scale=1)
             p_md[p_md<tolerance]=0
-            val_game,mix_row = game_solver(p_md) #Single round
+            val_game,mix_row = game_solver(p_md)
+            val_games[0,kk-1]=val_game
         results_valgame[index_pfa,distance_index]=val_games.mean()
         filename = "results_pmd_h.mat"
-        dictionary = {"values_game":results_valgame,"p_fas:":p_fas}
+        dictionary = {"values_game":results_valgame,"p_fas":p_fas}
         sp.io.savemat(filename,dictionary) 
         print(distance_index) 
         distance_index=distance_index+1

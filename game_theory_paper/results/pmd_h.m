@@ -1,0 +1,16 @@
+close all
+clear all
+load("./data/results_pmd_h.mat")
+p_fas = [1e-4,1e-3,1e-2]; %!!
+altezza = [10,20,30,50,70,100]; % !!
+
+figure
+set(gca,'TickLabelInterpreter','latex')
+plot(altezza,values_game(1,:),'-o')
+hold on
+plot(altezza,values_game(2,:),'-o')
+plot(altezza,values_game(3,:),'-o')
+grid on
+ylabel("$P_{\rm md}$",'interpreter','latex')
+xlabel('h','interpreter','latex')
+legend("$P_{\rm fa}=10^{-4}$","$P_{\rm fa}=10^{-3}$","$P_{\rm fa}=10^{-2}$",'interpreter','latex','Location','best')
