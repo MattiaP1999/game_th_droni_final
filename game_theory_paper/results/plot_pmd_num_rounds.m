@@ -1,15 +1,14 @@
 close all
 clear all
-%load("./data/Results_num_rounds_complete.mat")
 load("./data/Results_num_rounds.mat")
-x_axes = [1,2,3,4,5,6];
+x_axes = [1,2,3,4,5];
 figure
-semilogy(x_axes,values_game(1,:),'-o')
+semilogy(x_axes,values_game(1,1:end-1),'-o')
 hold on
-semilogy(x_axes,values_game(2,:),'-o')
-semilogy(x_axes,values_game(3,:),'-o')
+semilogy(x_axes,values_game(2,1:end-1),'-o')
+semilogy(x_axes,values_game(3,1:end-1),'-o')
 grid on
-xticks(1:1:6)
+xticks(1:1:5)
 
 set(gca,'TickLabelInterpreter','latex')
 ylabel("$P_{\rm md}$",'interpreter','latex')
