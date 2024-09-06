@@ -5,26 +5,27 @@ load("./data/results_pmd_pfa.mat")
 p_fas = p_fas_zoom;
 results_valgame_sim = results_valgame_sim_zoom;
 values_game = values_game_zoom;
-% x_axes_1 = p_fas(1:16);
+% x_axes_1 = p_fas(6:16);
 % x_axes = [x_axes_1,p_fas_zoom];
-% values_game_1_p = values_game_1(:,1:16);
+% values_game_1_p = values_game_1(:,6:16);
 % values_game_1 = [values_game_1_p,values_game_zoom];
 % 
-% results_valgame_sim_1_p = results_valgame_sim_1(:,1:16);
+% results_valgame_sim_1_p = results_valgame_sim_1(:,6:16);
 % results_valgame_sim_1 = [results_valgame_sim_1_p,results_valgame_sim_zoom];
 
 figure
-loglog(p_fas(1,1:16),values_game(1,1:16));
+loglog(p_fas(1,6:16),values_game(1,6:16));
 hold on
-loglog(p_fas(1,1:16),values_game(2,1:16));
-loglog(p_fas(1,1:16),values_game(3,1:16));
-loglog(p_fas(1,1:16),results_valgame_sim(1,1:16),"x");
-loglog(p_fas(1,1:16),results_valgame_sim(2,1:16),"x");
-loglog(p_fas(1,1:16),results_valgame_sim(3,1:16),"x");
+loglog(p_fas(1,6:16),values_game(2,6:16));
+loglog(p_fas(1,6:16),values_game(3,6:16));
+loglog(p_fas(1,6:16),results_valgame_sim(1,6:16),"x");
+loglog(p_fas(1,6:16),results_valgame_sim(2,6:16),"x");
+loglog(p_fas(1,6:16),results_valgame_sim(3,6:16),"x");
 grid on
 set(gca,'TickLabelInterpreter','latex')
 ylabel("$P_{\rm md}$",'interpreter','latex')
 xlabel("$P_{\rm fa}$",'interpreter','latex')
+xlim([7.196856730011514e-05 1])
 legend('$\sigma_{\rm s}: 10$','$\sigma_{\rm s}: 13$','$\sigma_{\rm s}: 16$',"simulated values",'interpreter','latex','Location','best')
 
 % axes('position',[.20 .175 .25 .25])
