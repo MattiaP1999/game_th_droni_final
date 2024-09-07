@@ -1,6 +1,6 @@
 close all
 %clear all
-load("./data/results_pmd_h_0.mat")
+load("./data/results_pmd_h.mat")
 p_fas = [1e-4,1e-3,1e-2]; %!!
 altezza = [10,20,30,50,70,100]; % !!
 figure

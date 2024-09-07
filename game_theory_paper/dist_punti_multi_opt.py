@@ -211,7 +211,7 @@ def grad(x,D):
 initial_position = 0
 print("Terminal (multiple):")
 print(initial_position)
-n_ch_realization = 25
+n_ch_realization = 50
 p_fa = 1e-3 #np.ndarray.tolist(np.linspace(1e-3,1.3e-3,10)) #[1e-5,1.05e-5,1.1e-5,1.15e-5,1.2e-5,1.25e-5,1.3e-5]
 dist = 50
 ptax = [4,6,8,10,12,16]
@@ -220,7 +220,7 @@ results_valgame = np.zeros((1,n_ptax))
 results_risparmio = np.zeros((1,n_ptax))
 results_dist_naive = np.zeros((1,n_ptax))
 results_dist_opt = np.zeros((1,n_ptax))
-num_realizations = np.int32(1e5)
+num_realizations = np.int32(1e4)
 tolerance = 1e-4
 strategy=False #true for one opt
 k=50
