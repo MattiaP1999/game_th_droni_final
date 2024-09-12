@@ -1,0 +1,77 @@
+% This file was created by matlab2tikz.
+%
+%The latest updates can be retrieved from
+%  http://www.mathworks.com/matlabcentral/fileexchange/22022-matlab2tikz-matlab2tikz
+%where you can also make suggestions and rate matlab2tikz.
+%
+\definecolor{mycolor1}{rgb}{0.00000,0.44700,0.74100}%
+\definecolor{mycolor2}{rgb}{0.85000,0.32500,0.09800}%
+\definecolor{mycolor3}{rgb}{0.92900,0.69400,0.12500}%
+\definecolor{mycolor4}{rgb}{0.49400,0.18400,0.55600}%
+%
+\begin{tikzpicture}
+
+\begin{axis}[%
+width=4.521in,
+height=3.566in,
+at={(0.758in,0.481in)},
+scale only axis,
+xmin=16,
+xmax=256,
+xlabel style={font=\color{white!15!black}},
+xlabel={Number of grid points},
+ymin=100,
+ymax=240,
+ylabel style={font=\color{white!15!black}},
+ylabel={Average distance},
+axis background/.style={fill=white},
+xmajorgrids,
+ymajorgrids,
+legend style={legend cell align=left, align=left, draw=white!15!black}
+]
+\addplot [color=mycolor1]
+  table[row sep=crcr]{%
+16	225.028609735558\\
+36	215.516051423089\\
+64	202.777205540974\\
+100	203.85558808564\\
+144	193.573376187738\\
+256	191.103047530306\\
+};
+\addlegendentry{LP}
+
+\addplot [color=mycolor2, mark=o, mark options={solid, mycolor2}]
+  table[row sep=crcr]{%
+16	219.197779500465\\
+36	194.096255319013\\
+64	170.307782289097\\
+100	154.325013190972\\
+144	137.614421231268\\
+256	122.291441116535\\
+};
+\addlegendentry{SNE}
+
+\addplot [color=mycolor3, mark=o, mark options={solid, mycolor3}]
+  table[row sep=crcr]{%
+16	216.146610087836\\
+36	188.610549627531\\
+64	161.016128111761\\
+100	144.615578619002\\
+144	127.965983363889\\
+256	109.59878306709\\
+};
+\addlegendentry{MNE}
+
+\addplot [color=mycolor4, dashed, mark=o, mark options={solid, mycolor4}]
+  table[row sep=crcr]{%
+16	215.986980528923\\
+36	188.104971223888\\
+64	160.274703328937\\
+100	143.271088723497\\
+144	126.803013435969\\
+256	108.255359886097\\
+};
+\addlegendentry{Global Opt}
+
+\end{axis}
+\end{tikzpicture}%

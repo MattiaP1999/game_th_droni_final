@@ -163,17 +163,17 @@ def find_opt_nes(A,D,value_g,tolerance):
 
 
 # START OF SCRIPT
-n_ch_realization = 1
-n_pfas = 8
-p_fas_log = np.logspace(-12,-1,n_pfas,base = 10)
-p_fas = np.concatenate((p_fas_log,np.linspace(0.1,0.99,n_pfas),np.linspace(0.991,0.999,n_pfas)))
+n_ch_realization = 5
+n_pfas = 5
+p_fas_log = np.logspace(-4,-1,n_pfas,base = 10)
+p_fas = np.concatenate((p_fas_log,np.linspace(0.11,0.8,n_pfas),np.linspace(0.9,0.999,n_pfas)))
 n_pfas = 3*n_pfas
 sigmas = [10,13,16]
 results_valgame = np.zeros((3,n_pfas))
 results_valgame_checks = np.zeros((3,n_pfas))
 results_pfa_checks = np.zeros((3,n_pfas))
 results_uniforme = np.zeros((3,n_pfas))
-num_realizations = np.int32(2e5)
+num_realizations = np.int32(1e5)
 tolerance = 1e-5
 strategy=True #true for one opt
 k=50

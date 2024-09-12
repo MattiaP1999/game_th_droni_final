@@ -134,10 +134,10 @@ def playGame_multiple(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tole
 
 
 # START OF SCRIPT
-n_ch_realization = 20
+n_ch_realization = 10
 #p_fas = [1e-2]
-n_pfas = 20
-p_fas = np.ndarray.tolist(np.linspace(1e-3,1e-1,n_pfas))
+n_pfas = 10
+p_fas = np.ndarray.tolist(np.logspace(-3,-1,n_pfas,base=10))
 N = 3
 sigmas = [10,13,16]
 results_valgame = np.zeros((3,n_pfas))
