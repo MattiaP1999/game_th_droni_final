@@ -361,16 +361,15 @@ for sigma in sigmas:
             strategy_Alice_one = find_opt_nes(p_md,dist_matrix,val_game,tolerance).transpose()
             strategy_Alice_second = find_opt_nes_second(p_md,dist_matrix,val_game,tolerance,strategy_Alice_one).transpose()
                 #strategy_Alice_check = strategy_Alice.transpose()
-            [p_md_estim_global,avg_distance_estim_global] = playGame_multiple_dist(num_realizations,ch,strategy_Alice_one,strategy_Alice_second,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime_multiple)
-            #[p_md_estim_approx,avg_distance_estim_approx] = playGame_multiple_dist(num_realizations,ch,strategy_Alice_one,strategy_Alice_one,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime_multiple)
+            [p_md_estim_global,avg_distance_estim_global] = playGame_multiple_dist(num_realizations,ch,strategy_Alice_second,strategy_Alice_one,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime_multiple)
+            [p_md_estim_approx,avg_distance_estim_approx] = playGame_multiple_dist(num_realizations,ch,strategy_Alice_one,strategy_Alice_one,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime_multiple)
             #[p_md_estim_single,avg_distance_estim,avg_distance_naive,gain] = playGame(num_realizations,ch,strategy_Alice_one,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime,strategy_Alice_naive)
             #avg_dist_naive = mix_col@dist_matrix@mix_col
             #print(((avg_dist_naive-avg_distance_estim)/avg_dist_naive)*100)
             #risparmio[0][kk-1] = ((avg_dist_naive-avg_distance_estim)/avg_dist_naive)*100
             avg_dist_opt_global[0][kk-1] = avg_distance_estim_global
-            avg_dist_opt_approx[0][kk-1] = -1
+            avg_dist_opt_approx[0][kk-1] = avg_distance_estim_approx
         results_dist_opt_global[index_sigma,index_ptax]=avg_dist_opt_global.mean()
-        print(avg_dist_opt_global.mean())
         results_dist_opt_approx[index_sigma,index_ptax]=avg_dist_opt_approx.mean()
         if strategy==True:
             filename = "results_single_opt_prime_les_tol.mat"
