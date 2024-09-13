@@ -1,6 +1,5 @@
 import numpy as np
 import scipy as sp
-import numpy.matlib
 import os
 
 abspath = os.path.abspath(__file__)
@@ -50,38 +49,6 @@ def game_solver(A):
         v = -1
     return v,p
 
-def game_solver_one_opt(A,D,value_g,tolerance):
-    r=A.shape[0]
-    c = A.shape[1]
-    Aeq = np.ones((1,r))
-    b = -(-value_g-tolerance)*np.ones((c,1))
-    beq = 1
-    lb = np.zeros((r,1))
-    ub = np.ones((r,1))
-    return oneOpt(A,b[0,:],Aeq,beq,D,lb[0,:],ub[0,:])
-def oneOpt(A_ub,b_ub,A_eq,b_eq,D,lb,ub):
-    bounds=np.array([lb, ub]).transpose()
-    eq_constraint=sp.optimize.LinearConstraint(A=A_eq,lb=b_eq,ub=b_eq,keep_feasible=False)
-    neq_constraint = sp.optimize.LinearConstraint(A_ub,-np.inf*np.ones(np.array(ub).shape),b_ub)
-
-    termination_f = -1
-    n_att = 1
-    num_multi_start = 20
-    best_obj_val = np.inf
-    at_least_one = False
-    while n_att<=num_multi_start or at_least_one==False:
-        x0=np.random.rand(225,)
-        x0=x0/np.sum(x0)
-        res=sp.optimize.minimize(objective, x0=x0, args=(D), method=None, jac=None, hessp=None, bounds=bounds, constraints=(eq_constraint,neq_constraint), tol=1e-5, callback=None, options=None)
-        termination_f = res['status']
-        if termination_f==0:
-            at_least_one = True
-            obj_val = res['fun']
-            if obj_val<best_obj_val:
-                local_ne = res['x']
-                best_obj_val = obj_val
-        n_att = n_att+1
-    return local_ne
 def rand_sample(probabilities,num_sim, tolerance):
     probabilities[probabilities<tolerance]=0
     current_position = np.random.randint(0,probabilities.shape[0])
@@ -94,45 +61,8 @@ def rand_sample(probabilities,num_sim, tolerance):
         p = p.transpose()
         current_position = np.random.choice(arr,None,True,p)
     return y 
-def playGame(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tolerance,k,varphiprime): #[p_md,avg_distance] 
-    realizations_Alice = np.int32(rand_sample(strategy_alice,num_realizations,tolerance))[0,:]
-    strategy_eve[strategy_eve<tolerance]=0
-    realizations_Eve = np.int32(rand_sample(strategy_eve,num_realizations,tolerance))[0,:]
-    #realizations_Eve = realizations_Alice
-    num_mis_det = 0
-    real_eve = ch[0,realizations_Eve]
-    att_eve=real_eve+np.random.normal(np.zeros((1,num_realizations)),real_eve/np.sqrt(k),None)
-    dist =0
-    prev_Alice = realizations_Alice[0]
-    for ii in range(realizations_Eve.shape[0]):
-        current_pos_Alice = realizations_Alice[ii]
-        curr_channel_Alice = ch[0,current_pos_Alice]
-        att_eve_fake = curr_channel_Alice+np.random.normal(np.zeros((1,1)),curr_channel_Alice/np.sqrt(k),None)
-        d= (x1[0,current_pos_Alice]-x1[0,prev_Alice])**2+(x2[0,current_pos_Alice]-x2[0,prev_Alice])**2
-        dist = dist+np.sqrt(d)
-        prev_Alice = current_pos_Alice
-        test = (k*(att_eve[0,ii]-curr_channel_Alice)**2)/(curr_channel_Alice**2)
-        #test = (k*(att_eve_fake-curr_channel_Alice)**2)/(curr_channel_Alice**2)
-        if test<varphiprime:
-            num_mis_det = num_mis_det+1
 
-    p_md = num_mis_det/realizations_Alice.shape[0]
-    avg_distance = dist/realizations_Alice.shape[0]
-    return p_md,avg_distance
-def find_opt_nes(A,D,value_g,tolerance):
-    r=A.shape[0]
-    c = A.shape[1]
-    b = -(-value_g-tolerance)*np.ones((c,1))
-    opt_nes = np.zeros((r,r))
-    for ii in range(r):
-        f= D[ii,:].transpose()
-        Aeq = np.ones((1,r))
-        lb = np.zeros((r,1))
-        ub = np.ones((r,1))
-        beq =1
-        [local_ne,flag] = greedyStrategy(A,b,Aeq,beq,f,lb,ub)
-        opt_nes[:,ii]=local_ne
-    return opt_nes
+
 def playGame_multiple(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tolerance,k,varphiprime,N): #[p_md,avg_distance]
     num_games =  num_realizations
     realizations_Alice = np.int32(rand_sample(strategy_alice,N*num_games,tolerance))[0,:]
@@ -166,10 +96,10 @@ def playGame_multiple(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tole
 
 
 # START OF SCRIPT
-n_ch_realization = 10
+n_ch_realization = 1
 #p_fas = [1e-2]
-n_pfas = 3
-p_fas = [1e-4,1e-3,1e-2]
+n_pfas = 1
+p_fas = [1e-4]
 N = [1,2,3,4,5]
 sigma = 10
 results_valgame = np.zeros((3,5))
@@ -192,7 +122,6 @@ for p_fa in p_fas:
         for kk in ch_real:
             filename = './data_from_python/sigma/data_'+str(ptax)+'_'+str(distance)+'_'+str(sigma)+'_'+str(kk)+'.mat'
             mat_f_load = sp.io.loadmat(filename)
-            #mat_f_load = sp.io.loadmat('./data_from_python/dist/data_gth_pythontemp.mat') 
             ch = (10**(-np.array(mat_f_load["ch"])/20))**2
             ch = ch+min(min(ch)/10)
             x1 = np.array(mat_f_load["x1"])
@@ -203,7 +132,6 @@ for p_fa in p_fas:
             dist_matrix = np.reshape(get_distance(x1_line,x2_line),[x1_line.size,x1_line.size])
             varphi_prime= sp.stats.chi2.ppf(1-p_fa, 1, loc=0, scale=1)
             varphi_prime_multiple= sp.stats.chi2.ppf(1-p_fa, n, loc=0, scale=1)
-            #gi_star= np.zeros((n_att,n_att))
             p_md = np.zeros((n_att,n_att)) 
             for ii in range(n_att):
                 for jj in range(n_att):
@@ -218,30 +146,11 @@ for p_fa in p_fas:
             strategy_Alice_naive = np.matlib.repmat(mix_col.transpose(),mix_col.shape[0],1) #repeted by rows
             p_md_estim_multiple,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_Alice_naive,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime_multiple,n)
             val_games_check[0][kk-1]=p_md_estim_multiple
-        #results_valgame[index_pfa,index_dist]=val_games.mean()
-        #results_risparmio[index_pfa,index_dist]=risparmio.mean()
         results_valgame[index_pfa,n_index]=val_games_check.mean()
         counter = counter +1
         print(str(counter/np.float16(results_valgame.size)*100))
         n_index=n_index+1
-        sp.io.savemat("Results_num_rounds.mat", dict(values_game=results_valgame))
     index_pfa=index_pfa+1
-    # plotting
-"""fig, ax = plt.subplots()
-
-
-ax.semilogy(N, results_valgame[0,:], label="pfa=1e-4")
-ax.semilogy(N, results_valgame[1,:], label="pfa=5e-4")
-ax.semilogy(N, results_valgame[2,:], label="pfa=1e-3")
-
-plt.xlabel('N') 
-plt.ylabel('Pmd') 
-plt.title('Pmd VS Number of rounds') 
-plt.grid(True) 
-plt.legend(loc="upper right")
-plt.show()
-
-print("Stop")"""
 
 
 
