@@ -1,0 +1,57 @@
+% This file was created by matlab2tikz.
+%
+%The latest updates can be retrieved from
+%  http://www.mathworks.com/matlabcentral/fileexchange/22022-matlab2tikz-matlab2tikz
+%where you can also make suggestions and rate matlab2tikz.
+%
+\begin{tikzpicture}
+
+\begin{axis}[%
+width=4.521in,
+height=3.566in,
+at={(0.758in,0.481in)},
+scale only axis,
+xmin=10,
+xmax=100,
+xlabel style={font=\color{white!15!black}},
+xlabel={$h$},
+ymin=80,
+ymax=240,
+ylabel style={font=\color{white!15!black}},
+ylabel={Average distance [m]},
+axis background/.style={fill=white},
+xmajorgrids,
+ymajorgrids
+]
+\addplot [color=green, forget plot]
+ plot [error bars/.cd, y dir=both, y explicit, error bar style={line width=0.5pt}, error mark options={line width=0.5pt, mark size=6.0pt, rotate=90}]
+ table[row sep=crcr, y error plus index=2, y error minus index=3]{%
+10	185.788999145783	16.3757923859417	16.3757923859417\\
+20	189.694892658496	17.6959876466105	17.6959876466105\\
+30	193.457824460147	18.0008478066902	18.0008478066902\\
+50	201.735527206426	17.4315657739898	17.4315657739898\\
+70	201.194248736049	19.5884849540612	19.5884849540612\\
+100	204.191301249168	19.8480404075549	19.8480404075549\\
+};
+\addplot [color=blue, forget plot]
+ plot [error bars/.cd, y dir=both, y explicit, error bar style={line width=0.5pt}, error mark options={line width=0.5pt, mark size=10.0pt, rotate=90}]
+ table[row sep=crcr, y error plus index=2, y error minus index=3]{%
+10	120.337115736063	14.3441251945437	14.3441251945437\\
+20	118.83702583863	15.6351685857303	15.6351685857303\\
+30	120.916497763664	15.4020763479004	15.4020763479004\\
+50	122.42167998389	18.1107536071421	18.1107536071421\\
+70	117.39874785224	19.1560156617787	19.1560156617787\\
+100	113.612556522092	20.7661572047722	20.7661572047722\\
+};
+\addplot [color=red, forget plot]
+ plot [error bars/.cd, y dir=both, y explicit, error bar style={line width=0.5pt}, error mark options={line width=0.5pt, mark size=6.0pt, rotate=90}]
+ table[row sep=crcr, y error plus index=2, y error minus index=3]{%
+10	130.821089782452	17.2433335212807	17.2433335212807\\
+20	128.266146468428	19.0089136518843	19.0089136518843\\
+30	132.485942760266	17.9579305935495	17.9579305935495\\
+50	135.376633014351	21.4317167780056	21.4317167780056\\
+70	127.316832732439	23.19403458159	23.19403458159\\
+100	128.037859596892	25.7985973228236	25.7985973228236\\
+};
+\end{axis}
+\end{tikzpicture}%

@@ -3,29 +3,30 @@ clear all
 load("./data/distance_altezza/processed_data.mat")
 % % 
 altezza = [10,20,30,50,70,100];
-up_naive = mean_naive+sqrt(var_naive);
-down_naive = mean_naive-sqrt(var_naive);
-
-up_opt = mean_one_opt+sqrt(var_one_opt);
-down_opt = mean_one_opt-sqrt(var_one_opt);
-
-up_multi = mean_multi+sqrt(var_multi);
-down_multi = mean_multi-sqrt(var_multi);
+% up_naive = mean_naive+sqrt(var_naive);
+% down_naive = mean_naive-sqrt(var_naive);
+% 
+% up_opt = mean_one_opt+sqrt(var_one_opt);
+% down_opt = mean_one_opt-sqrt(var_one_opt);
+% 
+% up_multi = mean_multi+sqrt(var_multi);
+% down_multi = mean_multi-sqrt(var_multi);
 
 
 figure
 set(gca,'TickLabelInterpreter','latex')
-plot(altezza,mean_naive,'blue')
+errorbar(altezza,mean_naive,sqrt(var_naive),'green')
 hold on
-plot(altezza,mean_one_opt,"-^")
-plot(altezza,mean_multi,"-o")
+errorbar(altezza,mean_multi,sqrt(var_multi),'blue',"CapSize",10)
+errorbar(altezza,mean_one_opt,sqrt(var_one_opt),'red')
 grid on
 ylabel("Average distance [m]",'interpreter','latex')
 xlabel('$h$','interpreter','latex')
+matlab2tikz('myfile.tex');
 %legend('LP solution','SNE','MNE','interpreter','latex','Location','best')
-patch([altezza fliplr(altezza)],[up_naive fliplr(down_naive)],'blue',"FaceAlpha",0.2,'LineStyle','none')
-patch([altezza fliplr(altezza)],[up_opt fliplr(down_opt)],'red',"FaceAlpha",0.2,'LineStyle','none')
-patch([altezza fliplr(altezza)],[up_multi fliplr(down_multi)],'yellow',"FaceAlpha",0.2,'LineStyle','none')
+%patch([altezza fliplr(altezza)],[up_naive fliplr(down_naive)],'blue',"FaceAlpha",0.2,'LineStyle','none')
+%patch([altezza fliplr(altezza)],[up_opt fliplr(down_opt)],'red',"FaceAlpha",0.2,'LineStyle','none')
+%patch([altezza fliplr(altezza)],[up_multi fliplr(down_multi)],'yellow',"FaceAlpha",0.2,'LineStyle','none')
 
 
 % 

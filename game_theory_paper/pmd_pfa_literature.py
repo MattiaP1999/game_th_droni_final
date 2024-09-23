@@ -1,6 +1,5 @@
 import numpy as np
 import scipy as sp
-import numpy.matlib
 import os
 
 abspath = os.path.abspath(__file__)
@@ -146,14 +145,18 @@ def getStrUni(channel,num_extractions):
 
 
 # START OF SCRIPT
-n_ch_realization = 1
+n_ch_realization = 4
 #p_fas = [1e-2]
-n_pfas = 10
+n_pfas = 8
 p_fas = np.ndarray.tolist(np.logspace(-3,-1,n_pfas,base=10))
-N = 1
-sigmas = [10,13,16]
-results_valgame = np.zeros((3,n_pfas))
-num_realizations = np.int32(5e5)
+N = 2
+sigmas = [10]
+results_optimal = np.zeros((1,n_pfas))
+results_uni_uni = np.zeros((1,n_pfas))
+results_uni_smart = np.zeros((1,n_pfas))
+results_globe_k_double = np.zeros((1,n_pfas))
+num_realizations = np.int32(1e6)
+num_prob_estim = 1e5
 tolerance = 1e-5
 k=50
 distance =50
@@ -165,12 +168,13 @@ for sigma in sigmas:
     for p_fa in p_fas:
         ch_real = np.arange(1,n_ch_realization+1,1, dtype=int)
         val_games = np.zeros((1,n_ch_realization), dtype=float)
-        val_games_check = np.zeros((1,n_ch_realization), dtype=float)
-        risparmio =np.zeros((1,n_ch_realization), dtype=float)
+        val_games_optimal = np.zeros((1,n_ch_realization), dtype=float)
+        val_games_uni_uni = np.zeros((1,n_ch_realization), dtype=float)
+        val_games_uni_smart = np.zeros((1,n_ch_realization), dtype=float)
+        val_games_k_double = np.zeros((1,n_ch_realization), dtype=float)
         for kk in ch_real:
             filename = './data_from_python/sigma/data_'+str(ptax)+'_'+str(distance)+'_'+str(sigma)+'_'+str(kk)+'.mat'
             mat_f_load = sp.io.loadmat(filename)
-            #mat_f_load = sp.io.loadmat('./data_from_python/dist/data_gth_pythontemp.mat') 
             ch = (10**(-np.array(mat_f_load["ch"])/20))**2
             ch = ch+min(min(ch)/10)
             x1 = np.array(mat_f_load["x1"])
@@ -182,64 +186,57 @@ for sigma in sigmas:
             varphi_prime= sp.stats.chi2.ppf(1-p_fa, 1, loc=0, scale=1)
             varphi_prime_multiple= sp.stats.chi2.ppf(1-p_fa, N, loc=0, scale=1)
             #gi_star= np.zeros((n_att,n_att))
-            p_md = np.zeros((n_att,n_att)) 
+            p_md = np.zeros((n_att,n_att))
+            p_md_k_double =  np.zeros((n_att,n_att))
             for ii in range(n_att):
                 for jj in range(n_att):
                     nc = ((ch[0][ii]-ch[0][jj])*np.sqrt(k)/ch[0][ii])**2
+                    nc_k_double = ((ch[0][ii]-ch[0][jj])*np.sqrt(2*k)/ch[0][ii])**2
                     x=varphi_prime*(ch[0][jj]/ch[0][ii])**2
                     p_md[ii,jj] = sp.stats.ncx2.cdf(x, 1, nc, loc=0, scale=1)
+                    p_md_k_double[ii,jj] = sp.stats.ncx2.cdf(x, 1, nc_k_double, loc=0, scale=1)
             p_md[p_md<tolerance]=0
+            p_md_k_double[p_md_k_double<tolerance]=0
             val_game,mix_row = game_solver(p_md)
+            val_game_k_double,_ = game_solver(p_md_k_double)
             _,mix_col = game_solver(-p_md.transpose())
             mix_row[mix_row<tolerance]=0
             strategy_eve_naive = np.matlib.repmat(mix_row.transpose(),mix_row.shape[0],1) #repeted by rows
             strategy_Alice_naive = np.matlib.repmat(mix_col.transpose(),mix_col.shape[0],1) #repeted by rows
 
             # Start part
-            num_estim = 1e5
-            mix_Alice_uniform = getStrUni(ch,num_estim)
-            mix_Alice_uniform[mix_Alice_uniform<tolerance]=0
-            strategy_Alice_uniform_gains = np.matlib.repmat(mix_Alice_uniform.transpose(),mix_Alice_uniform.shape[0],1) #repeted by rows
-            #p_md_uni_uni,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_Alice_uniform_gains,strategy_Alice_uniform_gains,x1_line,x2_line,tolerance,k,varphi_prime_multiple,N)
-            #p_md_uni_uni = mix_Alice_uniform.transpose()@p_md.transpose()@mix_Alice_uniform
-            p_md_uni_smart = np.max(p_md.transpose()@mix_Alice_uniform)
-            index_max = np.argmax(p_md.transpose()@mix_Alice_uniform)
+            mix_agent_uniform = getStrUni(ch,num_prob_estim)
+            mix_agent_uniform[mix_agent_uniform<tolerance]=0
+            strategy_agent_uniform_gains = np.matlib.repmat(mix_agent_uniform.transpose(),mix_agent_uniform.shape[0],1) #repeted by rows
+            p_md_uni_uni,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_agent_uniform_gains,strategy_agent_uniform_gains,x1_line,x2_line,tolerance,k,varphi_prime_multiple,N)
+            #p_md_uni_uni = mix_agent_uniform.transpose()@p_md.transpose()@mix_agent_uniform #check
+            #p_md_uni_smart = np.max(p_md.transpose()@strategy_agent_uniform_gains)
+            index_max = np.argmax(p_md.transpose()@mix_agent_uniform)
             mix_row_smart = np.zeros(mix_row.shape[0])
             mix_row_smart[index_max]=1
-            strategy_row_max = np.matlib.repmat(mix_row_smart.transpose(),mix_row_smart.shape[0],1) #repeted by rows
+            strategy_Eve_max = np.matlib.repmat(mix_row_smart.transpose(),mix_row_smart.shape[0],1) #repeted by rows
 
             #p_md_uni_uni,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_Alice_uniform_gains,strategy_Alice_uniform_gains,x1_line,x2_line,tolerance,k,varphi_prime_multiple,N)
-            p_md_uni_smart_estim,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_Alice_uniform_gains,strategy_row_max,x1_line,x2_line,tolerance,k,varphi_prime_multiple,N)
-            print("Qua")
+            p_md_uni_smart_estim,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_agent_uniform_gains,strategy_Eve_max,x1_line,x2_line,tolerance,k,varphi_prime_multiple,N)
+
             # End part 
-            p_md_estim_multiple,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_Alice_naive,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime_multiple,N)
-            val_games_check[0][kk-1]=p_md_estim_multiple
-        #results_valgame[index_sigma,index_dist]=val_games.mean()
-        #results_risparmio[index_sigma,index_dist]=risparmio.mean()
-        results_valgame[index_sigma,index_pfa]=val_games_check.mean()
+            p_md_optimal,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_Alice_naive,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime_multiple,N)
+            val_games_optimal[0][kk-1]=p_md_optimal 
+            val_games_uni_uni[0][kk-1] = p_md_uni_uni
+            val_games_uni_smart[0][kk-1] = p_md_uni_smart_estim
+            val_games_k_double[0][kk-1] = val_game_k_double
+        results_optimal[index_sigma,index_pfa] = val_games_optimal.mean()
+        results_uni_uni[index_sigma,index_pfa] = val_games_uni_uni.mean()
+        results_uni_smart[index_sigma,index_pfa] = val_games_uni_smart.mean()
+        results_globe_k_double[index_sigma,index_pfa] = val_games_k_double.mean()
         counter = counter +1
-        print(str(counter/np.float16(results_valgame.size)*100))
+        print(str(counter/np.float16(results_optimal.size)*100))
         index_pfa=index_pfa+1
-        filename ="Results_pfa_pmd_round_"+str(N)+".mat"
-        dic = {"values_game_"+str(N):results_valgame,"p_fas":p_fas}
+        filename ="Results_literature.mat"
+        dic = {"results_optimal":results_optimal,"results_uni_uni":results_uni_uni,"results_uni_smart":results_uni_smart,"result_k_double":results_globe_k_double,"p_fas":p_fas}
         sp.io.savemat(filename, dic)
     index_sigma=index_sigma+1
-    # plotting
-"""fig, ax = plt.subplots()
 
-
-ax.semilogy(N, results_valgame[0,:], label="pfa=1e-4")
-ax.semilogy(N, results_valgame[1,:], label="pfa=5e-4")
-ax.semilogy(N, results_valgame[2,:], label="pfa=1e-3")
-
-plt.xlabel('N') 
-plt.ylabel('Pmd') 
-plt.title('Pmd VS Number of rounds') 
-plt.grid(True) 
-plt.legend(loc="upper right")
-plt.show()
-
-print("Stop")"""
 
 
 
