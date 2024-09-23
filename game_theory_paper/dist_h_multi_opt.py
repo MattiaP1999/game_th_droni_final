@@ -1,8 +1,6 @@
 import numpy as np
 import scipy as sp
-import numpy.matlib
 import os
-import matplotlib.pyplot as plt
 
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
@@ -51,60 +49,6 @@ def game_solver(A):
         v = -1
     return v,p
 
-def game_solver_one_opt(A,D,value_g,tolerance):
-    r=A.shape[0]
-    c = A.shape[1]
-    Aeq = np.ones((1,r))
-    b = -(-value_g-tolerance)*np.ones((c,1))
-    beq = 1
-    lb = np.zeros((r,1))
-    ub = np.ones((r,1))
-    return oneOpt(A,b[0,:],Aeq,beq,D,lb[0,:],ub[0,:])
-    #return oneOptGenetic(A,b[0,:],Aeq,beq,D,lb[0,:],ub[0,:])
-def objective(x, D):
-    temp=np.matmul(x.transpose(),D)
-    return np.matmul(temp,x)
-def quadhess(x,D,a):
-    return 2*D
-def grad(x,D):
-    return 2*np.matmul(D,x)
-def oneOpt(A_ub,b_ub,A_eq,b_eq,D,lb,ub):
-    bounds=np.array([lb, ub]).transpose()
-    eq_constraint=sp.optimize.LinearConstraint(A=A_eq,lb=b_eq,ub=b_eq,keep_feasible=False)
-    neq_constraint = sp.optimize.LinearConstraint(A_ub,-np.inf*np.ones(np.array(ub).shape),b_ub)
-
-    termination_f = -1
-    n_att = 1
-    num_multi_start = 20
-    best_obj_val = np.inf
-    at_least_one = False
-    while n_att<=num_multi_start or at_least_one==False:
-        x0=np.random.rand(225,)
-        x0=x0/np.sum(x0)
-        res=sp.optimize.minimize(objective, x0=x0, args=(D), method=None, jac=grad, hessp=None, bounds=bounds, constraints=(eq_constraint,neq_constraint), tol=1e-5, callback=None, options=None)
-        termination_f = res['status']
-        if termination_f==0:
-            at_least_one = True
-            obj_val = res['fun']
-            if obj_val<best_obj_val:
-                local_ne = res['x']
-                best_obj_val = obj_val
-        n_att = n_att+1
-    return local_ne
-def oneOptGenetic(A_ub,b_ub,A_eq,b_eq,D,lb,ub):
-    x0=np.random.rand(225,)
-    x0=x0/np.sum(x0)
-    zero_v = np.zeros((1,A_ub.shape[1]))[0,:]
-    one_v = np.ones((1,A_ub.shape[1]))[0,:]
-    bound_list = []
-    for el in range(A_ub.shape[1]):
-        bound_list.append((0,1))
-    eq_constraint=sp.optimize.LinearConstraint(A=A_eq,lb=b_eq,ub=b_eq)
-    neq_constraint = sp.optimize.LinearConstraint(A_ub,-np.inf*np.ones(np.array(ub).shape),b_ub)
-    res=sp.optimize.differential_evolution(func=objective,bounds=bound_list,args=(D,),constraints=(eq_constraint,neq_constraint),workers=1,x0=x0)
-    print(res["Message"])
-    print(res["fun"])
-    return res["x"]
 def rand_sample(probabilities,num_sim, tolerance):
     probabilities[probabilities<tolerance]=0
     current_position = np.random.randint(0,probabilities.shape[0])
@@ -122,7 +66,6 @@ def playGame(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tolerance,k,v
     realizations_Alice_naive = np.int32(rand_sample(strategy_alice_naive,num_realizations,tolerance))[0,:]
     strategy_eve[strategy_eve<tolerance]=0
     realizations_Eve = np.int32(rand_sample(strategy_eve,num_realizations,tolerance))[0,:]
-    #realizations_Eve = realizations_Alice
     num_mis_det = 0
     real_eve = ch[0,realizations_Eve]
     att_eve=real_eve+np.random.normal(np.zeros((1,num_realizations)),real_eve/np.sqrt(k),None)
@@ -135,7 +78,7 @@ def playGame(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tolerance,k,v
         current_pos_Alice = realizations_Alice[ii]
         current_pos_Alice_naive = realizations_Alice_naive[ii]
         curr_channel_Alice = ch[0,current_pos_Alice]
-        att_eve_fake = curr_channel_Alice+np.random.normal(np.zeros((1,1)),curr_channel_Alice/np.sqrt(k),None)
+        #att_eve_fake = curr_channel_Alice+np.random.normal(np.zeros((1,1)),curr_channel_Alice/np.sqrt(k),None)
         d= (np.float64(x1[0,current_pos_Alice])-np.float64(x1[0,prev_Alice]))**2+(np.float64(x2[0,current_pos_Alice])-np.float64(x2[0,prev_Alice]))**2
         d_naive = (np.float64(x1[0,current_pos_Alice_naive])-np.float64(x1[0,prev_Alice_naive]))**2+(np.float64(x2[0,current_pos_Alice_naive])-np.float64(x2[0,prev_Alice_naive]))**2
         dist = dist+np.sqrt(d)
@@ -153,34 +96,7 @@ def playGame(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tolerance,k,v
     avg_dist_naive = dist_naive/(realizations_Alice.shape[0]-1)
     gain = gain_temp/(realizations_Alice.shape[0]-1)
     return p_md,avg_distance,avg_dist_naive,gain
-def playGame_multiple(num_realizations,ch,strategy_alice,strategy_eve,x1,x2,tolerance,k,varphiprime,N): #[p_md,avg_distance]
-    num_games =  num_realizations
-    realizations_Alice = np.int32(rand_sample(strategy_alice,N*num_games,tolerance))[0,:]
-    strategy_eve[strategy_eve<tolerance]=0
-    realizations_Eve = np.int32(rand_sample(strategy_eve,N*num_games,tolerance))[0,:]
-    #realizations_Eve = realizations_Alice
-    num_mis_det = 0
-    num_fa =0
-    real_eve = ch[0,realizations_Eve]
-    real_Alice = ch[0,realizations_Alice]
-    att_eve=real_eve+np.random.normal(np.zeros((1,N*num_games)),real_eve/np.sqrt(k),None)
-    att_Alice=real_Alice+np.random.normal(np.zeros((1,N*num_games)),real_Alice/np.sqrt(k),None)
-    for ii in range(num_games):
-        test_Eve=0
-        test_Alice=0
-        for rounds in range(N):
-            current_pos_Alice = realizations_Alice[rounds+ii]
-            curr_channel_Alice = ch[0,current_pos_Alice]
-            test_Eve = test_Eve + (k*(att_eve[0,rounds+ii]-curr_channel_Alice)**2)/(curr_channel_Alice**2)
-            test_Alice = test_Alice + (k*(att_Alice[0,rounds+ii]-curr_channel_Alice)**2)/(curr_channel_Alice**2)
-            #test = (k*(att_eve_fake-curr_channel_Alice)**2)/(curr_channel_Alice**2)
-        if test_Eve<varphiprime:
-            num_mis_det = num_mis_det+1
-        if test_Alice>varphiprime:
-            num_fa = num_fa+1
-    p_md = num_mis_det/num_games
-    p_fa = num_fa/num_games
-    return p_md,p_fa
+
 def find_opt_nes(A,D,value_g,tolerance):
     r=A.shape[0]
     c = A.shape[1]
@@ -195,14 +111,11 @@ def find_opt_nes(A,D,value_g,tolerance):
         [local_ne,flag] = greedyStrategy(A,b,Aeq,beq,f,lb,ub)
         opt_nes[:,ii]=local_ne
     return opt_nes
-def objective(x, D):
-    temp=np.matmul(x.transpose(),D)
-    return np.matmul(temp,x)
-def quadhess(x,D,a):
-    return 2*D
-def grad(x,D):
-    return 2*np.matmul(D,x)
-
+def getVariance(mean,vector,N):
+    var = 0
+    for el in vector[0,:]:
+        var = var + (el-mean)**2
+    return var/N
 
 
 
@@ -212,22 +125,36 @@ initial_position = 150
 print("Initial pos:")
 print(initial_position)
 n_ch_realization = 50
-p_fa = 1e-3 #np.ndarray.tolist(np.linspace(1e-3,1.3e-3,10)) #[1e-5,1.05e-5,1.1e-5,1.15e-5,1.2e-5,1.25e-5,1.3e-5]
+p_fa = 1e-3
 distances = [10,20,30,50,70,100]
 n_dist= len(distances)
 results_valgame = np.zeros((1,n_dist))
-results_risparmio = np.zeros((1,n_dist))
 results_dist_naive = np.zeros((1,n_dist))
 results_dist_opt = np.zeros((1,n_dist))
+results_variance_naive = np.zeros((1,n_dist)) #variance
+results_variance_opt= np.zeros((1,n_dist)) #variance
 num_realizations = np.int32(2e5)
 tolerance = 1e-4
-strategy=False #true for one opt
 k=50
 N=1
 ptax = 15
 sigmas =[10]
 counter =0
 index_sigma =0
+
+
+# Variance
+filename_variance_one = './results/data/distance_altezza/average_single.mat'
+filename_variance_multi = './results/data/distance_altezza/average_multi.mat'
+load_var = sp.io.loadmat(filename_variance_one)
+mean_opt_one = load_var['average_res_opt_single'][0,:]
+mean_naive_one = load_var['average_res_naive_single'][0,:]
+
+load_var = sp.io.loadmat(filename_variance_multi)
+mean_opt_multi = load_var['average_res_opt_multi'][0,:]
+mean_naive_multi = load_var['average_res_naive'][0,:]
+mean_naive= (mean_naive_one+mean_naive_multi)/2
+
 for sigma in sigmas:
     distance_index = 0
     for dist in distances:
@@ -236,6 +163,8 @@ for sigma in sigmas:
         risparmio =np.zeros((1,n_ch_realization), dtype=float)
         avg_dist_naive = np.zeros((1,n_ch_realization), dtype=float)
         avg_dist_opt = np.zeros((1,n_ch_realization), dtype=float)
+        temp_variance_naive = np.zeros((1,n_ch_realization), dtype=float)
+        temp_variance_opt = np.zeros((1,n_ch_realization), dtype=float)
         for kk in ch_real:
             filename = './data_from_python/complete_dataset/data_'+str(ptax)+'_'+str(dist)+'_'+str(sigma)+'_'+str(kk+initial_position)+'.mat'
             mat_f_load = sp.io.loadmat(filename)
@@ -259,18 +188,6 @@ for sigma in sigmas:
             p_md[p_md<tolerance]=0
             val_game,mix_row = game_solver(p_md) #Single round
             _,mix_col = game_solver(-p_md.transpose()) #Single round
-            #prova = mix_row.transpose()@p_md@mix_col
-            """ print("qua")
-             permutation_col = randperm(size(p_md,2));
-            permutation_row = randperm(size(p_md,1));
-            [~,inv_perm_col] = sort(permutation_col);
-            [~,inv_perm_row] = sort(permutation_row);
-            p_md_perm = p_md(:,permutation_col);
-            p_md_perm = p_md_perm(permutation_row,: );
-            mix_col=mix_col_perm(inv_perm_col); %Perm
-            mix_row = mix_row_perm(inv_perm_row); %Perm
-            mix_col(mix_col<tolerance)=0;
-            """
             mix_row[mix_row<tolerance]=0
             mix_col[mix_col<tolerance]=0
             
@@ -278,85 +195,24 @@ for sigma in sigmas:
             strategy_eve_naive = np.matlib.repmat(mix_row.transpose(),mix_row.shape[0],1) #repeted by rows
             strategy_Alice_naive = np.matlib.repmat(mix_col.transpose(),mix_col.shape[0],1) #repeted by rows
             #Multiple games
-            #p_md_estim_multiple,p_fa_estim_multiple=playGame_multiple(num_realizations,ch,strategy_Alice_naive,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime_multiple,N)
             val_games[0,kk-1]=val_game
             #Solve strategy
-            if strategy==True:
-                global_opt_ne = game_solver_one_opt(p_md,dist_matrix,val_game,tolerance)
-                strategy_Alice = np.matlib.repmat(global_opt_ne.transpose(),global_opt_ne.shape[0],1)
-                [p_md_estim,avg_distance_estim,avg_distance_naive,gain] = playGame(num_realizations,ch,strategy_Alice,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime,strategy_Alice_naive)
-                #avg_distance_estim = global_opt_ne@dist_matrix@global_opt_ne
-                #p_md_estim_check,avg_distance_estim_check=playGame(num_realizations,ch,strategy_Alice_naive,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime)
-            else:
-                strategy_Alice = find_opt_nes(p_md,dist_matrix,val_game,tolerance).transpose()
-                #strategy_Alice_check = strategy_Alice.transpose()
-                [p_md_estim,avg_distance_estim,avg_distance_naive,gain] = playGame(num_realizations,ch,strategy_Alice,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime,strategy_Alice_naive)
-            #avg_dist_naive = mix_col@dist_matrix@mix_col
-            #print(((avg_dist_naive-avg_distance_estim)/avg_dist_naive)*100)
-            #risparmio[0][kk-1] = ((avg_dist_naive-avg_distance_estim)/avg_dist_naive)*100
+            strategy_Alice = find_opt_nes(p_md,dist_matrix,val_game,tolerance).transpose()
+            [p_md_estim,avg_distance_estim,avg_distance_naive,gain] = playGame(num_realizations,ch,strategy_Alice,strategy_eve_naive,x1_line,x2_line,tolerance,k,varphi_prime,strategy_Alice_naive)
             risparmio[0][kk-1] = gain
             avg_dist_naive[0][kk-1] = avg_distance_naive
             avg_dist_opt[0][kk-1] = avg_distance_estim
         results_valgame[index_sigma,distance_index]=val_games.mean()
-        results_risparmio[index_sigma,distance_index]=risparmio.mean()
         results_dist_naive[index_sigma,distance_index]=avg_dist_naive.mean()
         results_dist_opt[index_sigma,distance_index]=avg_dist_opt.mean()
-        if strategy==True:
-            filename = "results_single_opt_prime_les_tol.mat"
-            #sp.io.savemat(filename, dict(values_game=results_valgame,risparmio_sing=results_risparmio,dist=distances,p_fas=p_fas, strategy_sing = strategy_Alice, x1_line = x1_line,x2_line=x2_line))
-        else:
-            filename = "results_multi_opt_dist"+str(initial_position)+".mat"
-            dictionary = {"values_game_"+str(initial_position):results_valgame,"results_risparmio_"+str(initial_position):results_risparmio, "results_dist_opt_"+str(initial_position):results_dist_opt, "results_dist_naive_"+str(initial_position):results_dist_naive}
-            #sp.io.savemat(filename, dict(values_game=results_valgame,results_risparmio=results_risparmio_dic,dist=distances,p_fas=p_fas, strategy_multi= strategy_Alice, x1_line = x1_line,x2_line=x2_line,results_dist_opt = results_dist_opt, results_dist_naive=results_dist_naive))
-            sp.io.savemat(filename,dictionary) 
+
+        #Variance
+        results_variance_naive[index_sigma,distance_index]=getVariance(mean_naive[distance_index],avg_dist_naive,n_ch_realization)
+        results_variance_opt[index_sigma,distance_index]=getVariance(mean_opt_multi[distance_index],avg_dist_opt,n_ch_realization)
+
+        filename = "results_multi_opt_dist_variance"+str(initial_position)+".mat"
+        dictionary = {"values_game_"+str(initial_position):results_valgame, "results_dist_opt_multi"+str(initial_position):results_dist_opt, "results_dist_naive_multi"+str(initial_position):results_dist_naive,"results_variance_naive_multi"+str(initial_position):results_variance_naive,"results_variance_opt_multi"+str(initial_position):results_variance_opt}
+        sp.io.savemat(filename,dictionary) 
         distance_index=distance_index+1
         print(distance_index)
     index_sigma=index_sigma+1
-
-"""""
-fig, ax = plt.subplots()
-
-
-ax.semilogy(distances, results_valgame[0,:], label="pfa=1e-4")
-ax.semilogy(distances, results_valgame[1,:], label="pfa=5e-4")
-ax.semilogy(distances, results_valgame[2,:], label="pfa=1e-3")
-
-plt.xlabel('Distance') 
-plt.ylabel('Pmd') 
-plt.title('Pmd VS Distance') 
-plt.grid(True) 
-plt.legend(loc="upper right")
-plt.show()
-
-
-fig, ax = plt.subplots()
-
-
-ax.plot(p_fas, results_valgame[0,:], label="pfa=1e-4")
-ax.plot(p_fas, results_valgame[1,:], label="pfa=5e-4")
-ax.plot(p_fas, results_valgame[2,:], label="pfa=1e-3")
-
-plt.xlabel('Distance [m]') 
-plt.ylabel('Pmd') 
-plt.title('Pmd VS Distance') 
-plt.grid(True) 
-plt.legend(loc="upper left")
-plt.show()
-
-fig, ax = plt.subplots()
-
-
-ax.plot(p_fas, results_risparmio[0,:], label="dist=10")
-#ax.plot(p_fas, results_risparmio[1,:], label="dist=50")
-#ax.plot(p_fas, results_risparmio[2,:], label="dist=100")
-
-plt.xlabel('Distance') 
-plt.ylabel('Risparmio %') 
-plt.title('Risparmio VS Distance') 
-plt.grid(True) 
-plt.legend(loc="upper right")
-plt.show()
-
-print("Fine")
-"""""
-
