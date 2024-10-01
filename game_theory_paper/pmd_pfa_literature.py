@@ -145,7 +145,7 @@ def getStrUni(channel,num_extractions):
 
 
 # START OF SCRIPT
-n_ch_realization = 4
+n_ch_realization = 2
 #p_fas = [1e-2]
 n_pfas = 8
 p_fas = np.ndarray.tolist(np.logspace(-3,-1,n_pfas,base=10))
@@ -163,6 +163,7 @@ distance =50
 ptax = 15
 counter =0
 index_sigma =0
+initial_position = 2
 for sigma in sigmas:
     index_pfa = 0
     for p_fa in p_fas:
@@ -173,7 +174,7 @@ for sigma in sigmas:
         val_games_uni_smart = np.zeros((1,n_ch_realization), dtype=float)
         val_games_k_double = np.zeros((1,n_ch_realization), dtype=float)
         for kk in ch_real:
-            filename = './data_from_python/sigma/data_'+str(ptax)+'_'+str(distance)+'_'+str(sigma)+'_'+str(kk)+'.mat'
+            filename = './data_from_python/sigma/data_'+str(ptax)+'_'+str(distance)+'_'+str(sigma)+'_'+str(kk+initial_position)+'.mat'
             mat_f_load = sp.io.loadmat(filename)
             ch = (10**(-np.array(mat_f_load["ch"])/20))**2
             ch = ch+min(min(ch)/10)
